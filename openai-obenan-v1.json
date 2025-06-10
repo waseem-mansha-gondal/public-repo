@@ -1,0 +1,895 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Obenan - Swagger API Documentation",
+    "version": "1.0.0",
+    "description": "Obenan Apis with Swagger"
+  },
+  "servers": [
+    {
+      "url": "https://stagingapi.obenan.com/api/v2",
+      "description": "Server URL"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "security": [
+    {
+      "BearerAuth": []
+    }
+  ],
+  "paths": {
+    "/posts": {
+      "post": {
+        "summary": "Create a new scheduled or repeating post for Google Business Profile and other directories",
+        "description": "Allows a logged-in user to create a new post for one or more specified locations or location groups. The post can include an image, descriptive content, a start date and time for publishing, and an optional Call-to-Action (CTA) button (e.g., 'Call Now', 'Book', 'Order', 'Shop', 'Learn More', 'Sign Up') with an associated URL. Posts can be scheduled to publish once, or set to repeat (e.g., daily, weekly, monthly) with a specified end date. The post image can also be optionally added to the Photos section of the linked Google Business Profile and/or other connected directories. This is used when a user fills out the form to make a new post, selects locations, sets a schedule (including repetition and end date), adds an image, defines a Call To Action, and writes a description.",
+        "tags": [
+          "Post"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "array",
+                    "description": "Array containing the details for one or more posts to be created.",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "locationIds": {
+                          "type": "array",
+                          "description": "Array of unique integer identifiers for the specific locations where this post will be published. This is selected by the user in the 'Select Location' dropdown.",
+                          "items": {
+                            "type": "integer",
+                            "example": 1608
+                          }
+                        },
+                        "groupIds": {
+                          "type": "array",
+                          "description": "Array of unique integer identifiers for location groups where this post will be published. All locations within these groups will receive the post.",
+                          "items": {
+                            "type": "integer",
+                            "example": 277
+                          }
+                        },
+                        "content": {
+                          "type": "string",
+                          "description": "The main text content or description for the post. This corresponds to the 'Post Description' field in the UI (max 1500 characters).",
+                          "example": "Check out our latest summer collection!"
+                        },
+                        "startDate": {
+                          "type": "string",
+                          "description": "The exact date and time (ISO 8601 UTC format) when the post should be published or its schedule should begin. This is chosen using the 'Select Date & Time' picker. Example: '2025-06-09T16:17:00.000Z' for 09/06/2025 04:17 PM.",
+                          "example": "2025-06-09T16:17:00.000Z"
+                        },
+                        "endDate": {
+                          "type": "string",
+                          "description": "If the post is set to repeat (i.e., 'repeat' is not 'no'), this is the exact date and time (ISO 8601 UTC format) when the repeating schedule should end. This is selected using the 'End date' picker. For non-repeating posts, this should be null. Example: '2025-10-06T12:00:00.000Z'.",
+                          "example": "2025-10-06T12:00:00.000Z"
+                        },
+                        "postType": {
+                          "type": "string",
+                          "description": "Specifies the Call-to-Action (CTA) button type for the post, selected from the 'Google Business Profile' dropdown (e.g., Call Now, Book, Shop). Valid options include: 'CALL', 'BOOK', 'ORDER', 'SHOP', 'LEARN_MORE', 'SIGN_UP'. This determines the button text and behavior on Google Business Profile.",
+                          "example": "CALL"
+                        },
+                        "url": {
+                          "type": "string",
+                          "description": "The URL associated with the Call-to-Action (CTA) button if the `postType` requires a link (e.g., for 'BOOK', 'ORDER', 'SHOP', 'LEARN_MORE', 'SIGN_UP'). This might be hidden or irrelevant if `postType` is 'CALL'.",
+                          "example": "https://example.com/shop-now"
+                        },
+                        "repeat": {
+                          "type": "string",
+                          "description": "Defines the repetition frequency of the post, selected from the 'Repeat This Post' dropdown. Examples: 'no' (for a one-time post), 'everyday', 'weekly', 'bi-weekly', 'monthly'. If not 'no', `customSchedule` and `endDate` are typically used.",
+                          "example": "everyday"
+                        },
+                        "title": {
+                          "type": "string",
+                          "description": "An optional title for the post. While not explicitly in the provided UI screenshot for creation, it's a common field for posts, often used for events or specific announcements.",
+                          "example": "Weekend Special Offer"
+                        },
+                        "customSchedule": {
+                          "type": "object",
+                          "description": "An object defining a custom repetition schedule if `repeat` indicates a complex frequency (e.g., 'weekly' on specific days, 'monthly' on specific dates). This allows fine-grained control over when a repeating post publishes.",
+                          "properties": {
+                            "frequency": {
+                              "type": "string",
+                              "description": "The base frequency for custom repetition.",
+                              "example": "weekly"
+                            },
+                            "occurance": {
+                              "type": "integer",
+                              "description": "How many times the post should occur within the frequency (e.g., 1 for every week, 2 for every second week).",
+                              "example": 1
+                            },
+                            "days": {
+                              "type": "array",
+                              "description": "For weekly frequency, an array of strings representing days of the week (e.g., 'Mon', 'Tue').",
+                              "items": {
+                                "type": "string"
+                              },
+                              "example": [
+                                "Mon",
+                                "Wed",
+                                "Fri"
+                              ]
+                            },
+                            "dates": {
+                              "type": "array",
+                              "description": "For monthly frequency, an array of integers representing specific dates of the month.",
+                              "items": {
+                                "type": "integer"
+                              },
+                              "example": [
+                                1,
+                                15
+                              ]
+                            }
+                          }
+                        },
+                        "postPictures": {
+                          "type": "array",
+                          "description": "An array of objects, each containing the `url` and `key` of an image to be included in the post. Users can upload an image using the camera icon in the UI.",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "url": {
+                                "type": "string",
+                                "description": "The publicly accessible URL of the uploaded image.",
+                                "example": "https://obenan-files-upload-dev.s3.amazonaws.com/companies/127/files/Files-1737363938714.jpeg"
+                              },
+                              "key": {
+                                "type": "string",
+                                "description": "The S3 storage key or identifier for the uploaded image file.",
+                                "example": "companies/null/files/Files-1737365512087.jpeg"
+                              }
+                            }
+                          }
+                        },
+                        "isUploadPicture": {
+                          "type": "boolean",
+                          "description": "Boolean flag, true if the user checked 'Add image to the Photos section of Google Business Profile?', false otherwise. Controls whether the provided image is also added to the GBP photos album.",
+                          "example": true
+                        },
+                        "uploadUberAll": {
+                          "type": "boolean",
+                          "description": "Boolean flag, true if the user checked 'Add image to the Photos section of All other Directories?', false otherwise. Controls if the image is also added to photo sections of other connected directories beyond GBP.",
+                          "example": false
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Post created successfully. The response will contain details of the created post, including its ID, schedule, and status."
+          },
+          "204": {
+            "description": "No Content. This might occur if the request was processed but there's no data to return, or an operation was successful but didn't result in new content."
+          },
+          "400": {
+            "description": "Bad Request. The request was invalid or cannot be otherwise served. Check for missing or malformed parameters in the request body (e.g., invalid date format, missing required fields)."
+          },
+          "401": {
+            "description": "Unauthorized Access. The user is not authenticated or does not have a valid token."
+          },
+          "403": {
+            "description": "Access Forbidden. The authenticated user does not have the necessary permissions to create a post for the specified location(s) or group(s)."
+          },
+          "500": {
+            "description": "Internal Server Error. An unexpected error occurred on the server."
+          }
+        }
+      },
+      "get": {
+        "summary": "Retrieve a list of all posts with filtering, pagination, and sorting options",
+        "description": "Fetches a list of all posts created by the user or for the locations/groups they have access to. This can be used to display existing posts in a list, view their statuses (e.g., '3763 Posted 11 times', 'Failed 1 times'), schedules ('10/06/2025 Tue, 4:00 PM'), repetition ('Repeat: daily'), and associated Call-to-Actions ('Google My CTA: Call Now'). Supports various filters such as status, location IDs, group ID, date ranges, cities, and a general search keyword. Also supports pagination to handle large numbers of posts and sorting to order the results.",
+        "tags": [
+          "Post"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "description": "Filters posts by their current publishing or schedule status (e.g., 'completed', 'pending', 'scheduled', 'failed', 'paused'). This helps find posts that are, for instance, all failed or all currently active.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "completed"
+            }
+          },
+          {
+            "in": "query",
+            "name": "locationIds",
+            "description": "Filters posts to include only those associated with the specified comma-separated location IDs. Useful for viewing posts for specific businesses. Example: '1608,1609'.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "groupId",
+            "description": "Filters posts to include only those associated with a specific location group ID. Helps view posts for a collection of businesses.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "description": "The maximum number of posts to return in a single response. Used for pagination. Example: 10 posts per page.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "example": 10
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "description": "The page number to retrieve when using pagination. For example, if limit is 10, page 2 will show posts 11-20.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          },
+          {
+            "in": "query",
+            "name": "startDate",
+            "description": "Filters posts to include those scheduled to start (publish) on or after this specified date (format: YYYY-MM-DD).",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "in": "query",
+            "name": "endDate",
+            "description": "Filters posts to include those scheduled to end on or before this specified date (format: YYYY-MM-DD), or posts that are ongoing and do not have a specific end date.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cities",
+            "description": "Filters posts based on the city of their associated locations. Provide a comma-separated list of city names. Example: 'Lahore,Islamabad'.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "description": "Performs a search for posts based on a keyword or phrase. This typically searches in post content, title, or associated location names/IDs (like '3763' in the UI). Example: 'Summer Sale' or 'Skardu Tech'.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "order",
+            "description": "Specifies the field by which the retrieved posts should be sorted (e.g., 'id', 'title', 'startDate', 'status', 'locationName'). For example, sort by 'startDate' to see upcoming posts first.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "orderBy",
+            "description": "Defines the sort order when using the 'order' parameter: 'asc' for ascending (e.g., A-Z, oldest to newest) or 'desc' for descending (e.g., Z-A, newest to oldest).",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully fetched a list of posts matching the criteria. The response includes pagination details and an array of post objects."
+          },
+          "204": {
+            "description": "No Content. No posts were found matching the specified filters."
+          },
+          "401": {
+            "description": "Unauthorized Access. The user is not authenticated."
+          },
+          "403": {
+            "description": "Access Forbidden. The user does not have permission to view posts for the requested locations/groups."
+          },
+          "500": {
+            "description": "Internal Server Error. An unexpected error occurred on the server."
+          }
+        }
+      },
+      "patch": {
+        "summary": "Bulk update multiple existing posts with new details",
+        "description": "Updates attributes for multiple existing posts in a single request. Each post to be updated is identified by its `postId`. You can modify details such as their content, schedule (start date, repeat settings), Call-to-Action URL, images, or the locations/groups they are associated with. This is useful for making batch changes, like rescheduling several posts at once or changing their content.",
+        "tags": [
+          "Post"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "array",
+                    "description": "An array of post objects, each containing the `postId` of the post to update and the fields to be modified.",
+                    "items": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "postId": {
+                              "type": "integer",
+                              "description": "The unique identifier of the post to be updated.",
+                              "example": 2953
+                            },
+                            "locationIds": {
+                              "type": "array",
+                              "description": "New array of location IDs to associate with this post.",
+                              "items": {
+                                "type": "integer"
+                              },
+                              "example": [
+                                1607,
+                                1608
+                              ]
+                            },
+                            "content": {
+                              "type": "string",
+                              "description": "The updated text content for the post.",
+                              "example": "Updated Event Details: Now on Saturday!"
+                            },
+                            "url": {
+                              "type": "string",
+                              "description": "The updated URL for the post's Call-to-Action button.",
+                              "example": "https://new-updated-url.com"
+                            },
+                            "startDate": {
+                              "type": "string",
+                              "description": "The updated start date and time for the post (ISO 8601 UTC format).",
+                              "example": "2024-03-28T10:00:00.000Z"
+                            },
+                            "repeat": {
+                              "type": "string",
+                              "description": "The updated repetition setting for the post (e.g., 'no', 'weekly').",
+                              "example": "weekly"
+                            },
+                            "postPictures": {
+                              "type": "array",
+                              "description": "Array to update the post's image(s). Provide new image URL(s) and key(s).",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "url": {
+                                    "type": "string",
+                                    "example": "https://new-pic.com/image.jpg"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Posts successfully updated. The response may contain the status for each update attempt within the bulk operation."
+          },
+          "204": {
+            "description": "No Content. Potentially if no posts matched the IDs for update or no changes were made."
+          },
+          "400": {
+            "description": "Bad Request. The request body is invalid (e.g., malformed JSON, incorrect data types, missing `postId`)."
+          },
+          "401": {
+            "description": "Unauthorized Access. User is not authenticated."
+          },
+          "403": {
+            "description": "Access Forbidden. User does not have permission to update one or more of the specified posts."
+          },
+          "500": {
+            "description": "Internal Server Error. An unexpected server error occurred."
+          }
+        }
+      }
+    },
+    "/posts/countries": {
+      "get": {
+        "summary": "Get a list of countries and cities where posts have been made",
+        "description": "Retrieves a structured list of unique countries and, within each country, a list of unique cities for which posts have been created or are associated with locations that have posts. This can be used to populate filters in a UI, allowing users to narrow down post lists by geography, or for reporting on the geographical distribution of posting activity.",
+        "tags": [
+          "Post"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved the list of countries and their associated cities with posts."
+          },
+          "204": {
+            "description": "No content. No posts found, or no geographical data available for existing posts."
+          },
+          "400": {
+            "description": "Bad request. The request was invalid for some reason."
+          },
+          "401": {
+            "description": "Unauthorized access. User is not authenticated."
+          },
+          "403": {
+            "description": "Access forbidden. User does not have permission to access this information."
+          },
+          "500": {
+            "description": "Internal server error. An unexpected error occurred on the server."
+          }
+        }
+      }
+    },
+    "/posts/cronJob": {
+      "get": {
+        "summary": "Trigger or check status of the scheduled post processing job",
+        "description": "This endpoint is typically invoked by an automated system scheduler (cron job) at regular intervals. Its purpose is to process posts that are due for publishing based on their `startDate` and `customSchedule`. It handles the actual submission of posts to Google Business Profile and other platforms. Calling this manually might trigger the job or return the status/results of the latest run. For an LLM, a query like 'process scheduled posts' or 'run the posting job' would map here.",
+        "tags": [
+          "Post"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cron job executed successfully or status retrieved. The response might indicate how many posts were processed."
+          },
+          "204": {
+            "description": "No content or no pending posts to process at this time."
+          },
+          "400": {
+            "description": "Bad request. The request might be malformed or parameters invalid if any are expected."
+          },
+          "401": {
+            "description": "Unauthorized access. This job might require special authentication."
+          },
+          "403": {
+            "description": "Access forbidden. User does not have permission to trigger or view this job."
+          },
+          "500": {
+            "description": "Internal server error. An error occurred while processing the cron job."
+          }
+        }
+      }
+    },
+    "/posts/{id}/logs": {
+      "get": {
+        "summary": "Get detailed publishing logs for a specific post",
+        "description": "Retrieves detailed activity and publishing logs for a single post, identified by its unique `id`. These logs provide a history of publishing attempts to each targeted location, including whether each attempt was successful, failed (e.g., 'Failed 1 times' in UI), the exact time of the attempt, and any error messages if it failed. This is very useful for users to troubleshoot why a post might not have appeared or to monitor its delivery status across different locations (e.g. 'Location Single' status from the listing UI). Supports searching within logs and sorting.",
+        "tags": [
+          "Post"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "The unique integer identifier of the post for which to retrieve logs. Example: 3763.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "companyId",
+            "description": "ID of the company to filter logs for. This is typically used by Super Admins to view logs for posts belonging to a specific company.",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "description": "A search term to filter log entries. This could search within log messages, location names, or error details related to the post's publishing attempts.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "order",
+            "description": "The field by which to sort the log entries (e.g., 'createdAt', 'status', 'locationName').",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "orderBy",
+            "description": "The direction for sorting: 'ASC' for ascending (oldest first), 'DESC' for descending (newest first).",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ASC",
+                "DESC"
+              ],
+              "default": "DESC"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully fetched the logs for the specified post. Contains an array of log entries detailing publishing attempts."
+          },
+          "204": {
+            "description": "No post logs found matching the criteria. The post might not have any publishing attempts yet or no logs exist for it."
+          },
+          "401": {
+            "description": "Unauthorized Access. User is not authenticated."
+          },
+          "403": {
+            "description": "Access Forbidden. User does not have permission to view logs for this post."
+          },
+          "500": {
+            "description": "Internal Server Error. An unexpected server error occurred."
+          }
+        }
+      }
+    },
+    "/posts/{id}": {
+      "get": {
+        "summary": "Get detailed information for a specific post (or multiple posts by comma-separated IDs)",
+        "description": "Retrieves comprehensive details for a single post, or multiple posts if a comma-separated list of IDs is provided. Information returned includes the post's ID (e.g., '3763'), content/description, its full schedule (start date '10/06/2025 Tue, 4:00 PM', end date, repetition rules 'Repeat: daily'), the selected Call-to-Action ('Google My CTA: Call Now'), any associated URL, uploaded images, the specific locations or groups it targets, its current publishing status (e.g., 'Posted N times', 'Failed M times'), and any error messages. This is used when a user wants to view or edit the details of an existing post.",
+        "tags": [
+          "Post"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "The unique identifier of the post to retrieve. Can be a single integer ID (e.g., '3763') or a comma-separated string of multiple IDs (e.g., '3763,3764,3765') to fetch details for several posts at once.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "3763"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully fetched detailed information for the specified post(s)."
+          },
+          "204": {
+            "description": "No Content. The post with the given ID was not found."
+          },
+          "400": {
+            "description": "Bad Request. The provided ID parameter is invalid or malformed."
+          },
+          "401": {
+            "description": "Unauthorized Access. User is not authenticated."
+          },
+          "403": {
+            "description": "Access Forbidden. User does not have permission to view this post."
+          },
+          "500": {
+            "description": "Internal Server Error. An unexpected server error occurred."
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update an existing post's details, schedule, or content",
+        "description": "Modifies an existing single post, identified by its unique `id`. Allows for updating various attributes such as its text content (description), publishing schedule (start date, time, repetition rules, end date, e.g., changing from 'Everyday' to 'Weekly' or adjusting the 'End date'), Call-to-Action (CTA) type ('Call Now', 'Shop', etc.) and its associated URL, uploaded images, or the specific locations/groups it targets. This is used when a user wants to edit a post they previously created, for example, to change the description, reschedule it, or update the image or CTA button.",
+        "tags": [
+          "Post"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "description": "The unique integer identifier of the post to be updated.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 3763
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "description": "Object containing the fields of the post to be updated. Only include fields that need changing.",
+                "properties": {
+                  "locationIds": {
+                    "type": "array",
+                    "description": "Updated array of unique integer identifiers for the locations where this post will be published.",
+                    "items": {
+                      "type": "integer"
+                    },
+                    "example": [
+                      1608
+                    ]
+                  },
+                  "groupIds": {
+                    "type": "array",
+                    "description": "Updated array of unique integer identifiers for location groups.",
+                    "items": {
+                      "type": "integer"
+                    },
+                    "example": [
+                      277
+                    ]
+                  },
+                  "content": {
+                    "type": "string",
+                    "description": "The new or updated text content for the post (Post Description).",
+                    "example": "Special discount this week only!"
+                  },
+                  "startDate": {
+                    "type": "string",
+                    "description": "The new or updated start date and time (ISO 8601 UTC format) for when the post should publish or its schedule should begin (Select Date & Time).",
+                    "example": "2025-06-10T10:00:00.000Z"
+                  },
+                  "endDate": {
+                    "type": "string",
+                    "description": "The new or updated end date and time (ISO 8601 UTC format) for a repeating post (End date).",
+                    "example": "2025-11-30T12:00:00.000Z"
+                  },
+                  "postType": {
+                    "type": "string",
+                    "description": "The new or updated Call-to-Action (CTA) button type (Google Business Profile dropdown).",
+                    "example": "SHOP"
+                  },
+                  "url": {
+                    "type": "string",
+                    "description": "The new or updated URL for the CTA button.",
+                    "example": "https://example.com/new-sale-page"
+                  },
+                  "repeat": {
+                    "type": "string",
+                    "description": "The new or updated repetition frequency for the post (Repeat This Post dropdown).",
+                    "example": "weekly"
+                  },
+                  "customSchedule": {
+                    "type": "object",
+                    "description": "Updated custom schedule object if `repeat` involves complex scheduling."
+                  },
+                  "postPictures": {
+                    "type": "array",
+                    "description": "New array of post picture objects if the image needs to be changed or updated.",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "url": {
+                          "type": "string",
+                          "example": "https://obenan-files-upload-dev.s3.amazonaws.com/companies/127/files/new_image.jpeg"
+                        },
+                        "key": {
+                          "type": "string",
+                          "example": "companies/127/files/new_image.jpeg"
+                        }
+                      }
+                    }
+                  },
+                  "isUploadPicture": {
+                    "type": "boolean",
+                    "description": "Updated choice for 'Add image to the Photos section of Google Business Profile?'."
+                  },
+                  "uploadUberAll": {
+                    "type": "boolean",
+                    "description": "Updated choice for 'Add image to the Photos section of All other Directories?'."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Post updated successfully. The response will contain the full details of the updated post."
+          },
+          "204": {
+            "description": "No Content. The post with the given ID was not found or no changes were applied."
+          },
+          "400": {
+            "description": "Bad Request. The request body is invalid (e.g., malformed JSON, incorrect data types for fields like dates or booleans)."
+          },
+          "401": {
+            "description": "Unauthorized Access. User is not authenticated."
+          },
+          "403": {
+            "description": "Access Forbidden. User does not have permission to update this post or assign it to the specified locations/groups."
+          },
+          "500": {
+            "description": "Internal Server Error. An unexpected server error occurred during the update."
+          }
+        }
+      }
+    },
+    "/posts/{ids}": {
+      "delete": {
+        "summary": "Delete one or more posts by their IDs",
+        "description": "Permanently deletes one or more posts. Posts are identified by a comma-separated list of their unique integer `ids`. This action will remove the posts from the system and cancel any of their future scheduled publishing. This would be used if a user selects one or more posts from a list and chooses a 'delete' action.",
+        "tags": [
+          "Post"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "ids",
+            "description": "A comma-separated string of unique integer post IDs to be deleted. Example: '2953,2954,2955'.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "2953,2954"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Post(s) deleted successfully. The response may indicate how many posts were deleted."
+          },
+          "204": {
+            "description": "No Content. None of the specified post IDs were found, or the posts were already deleted."
+          },
+          "401": {
+            "description": "Unauthorized Access. User is not authenticated."
+          },
+          "403": {
+            "description": "Access Forbidden. User does not have permission to delete one or more of the specified posts."
+          },
+          "500": {
+            "description": "Internal Server Error. An unexpected error occurred while trying to delete the posts."
+          }
+        }
+      }
+    },
+    "/posts/paused": {
+      "patch": {
+        "summary": "Pause or resume active or scheduled posts",
+        "description": "Allows a user to temporarily pause or resume one or more active or scheduled posts. Paused posts will not be published according to their defined schedule until they are explicitly resumed. The action (either 'pause' or 'resume') is specified by the `postStatus` query parameter, and the posts to be affected are provided in the request body. This is useful if a user wants to temporarily halt a campaign or a series of posts without deleting them.",
+        "tags": [
+          "Post"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "postStatus",
+            "description": "Determines the action to perform on the specified posts: 'pause' to temporarily stop a post's schedule and prevent it from publishing, or 'resume' to reactivate a previously paused post's schedule so it continues publishing as planned.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "pause",
+                "resume"
+              ],
+              "default": "pause"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "postIds": {
+                    "type": "array",
+                    "description": "An array of unique integer identifiers for the posts that need to be paused or resumed.",
+                    "example": [
+                      2953,
+                      3763
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Post(s) updated (paused or resumed) successfully. The response may contain the updated status of the posts."
+          },
+          "204": {
+            "description": "No Content. No posts were found for the given IDs, or no change in status was made."
+          },
+          "400": {
+            "description": "Bad Request. The `postStatus` query parameter is missing or invalid, or the `postIds` in the request body are missing or malformed."
+          },
+          "401": {
+            "description": "Unauthorized Access. User is not authenticated."
+          },
+          "403": {
+            "description": "Access Forbidden. User does not have permission to pause or resume the specified posts."
+          },
+          "500": {
+            "description": "Internal Server Error. An unexpected error occurred on the server."
+          }
+        }
+      }
+    }
+  }
+}
