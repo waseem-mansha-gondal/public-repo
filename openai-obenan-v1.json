@@ -8,7 +8,11 @@
   "servers": [
     {
       "url": "https://stagingapi.obenan.com/api/v2",
-      "description": "Server URL"
+      "description": "Obenan API v2"
+    },
+    {
+      "url": "https://stagingapi.obenan.com/api/v1",
+      "description": "Obenan API v1"
     }
   ],
   "components": {
@@ -26,6 +30,423 @@
     }
   ],
   "paths": {
+    "/review/getAllReviews": {
+      "get": {
+        "summary": "Get All Reviews for a Location",
+        "description": "Retrieves reviews for a specified location, with options to filter by reply status, reviewer name, and a search term within the review text.",
+        "tags": [
+          "Review"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "locationId",
+            "in": "query",
+            "description": "Unique integer identifier for the location.",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 93
+          },
+          {
+            "name": "haventReplied",
+            "in": "query",
+            "description": "Filter reviews by reply status. 0 for all reviews, 1 for reviews that haven't been replied to.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "enum": [0, 1]
+            },
+            "example": 0
+          },
+          {
+            "name": "reviewerTitle",
+            "in": "query",
+            "description": "Filter reviews by the reviewer's name/title.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "Jesse"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Search term to find within the review text.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "Drove"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with a list of reviews and count.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": { "type": "boolean", "example": true },
+                    "message": { "type": "string", "example": "Reviews" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "count": { "type": "integer", "example": 1 },
+                        "results": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "date": { "type": "string", "format": "date-time", "example": "2025-03-30T06:09:29.095Z" },
+                              "google_review_id": { "type": "string", "example": "AbFvOqlwkhi69bjpxMOJmS8VS5xDP7KwS2GFnM-crFduRcMhvTBBefYsQmwmYqCPdEjnCbkvAAjZpg" },
+                              "id": { "type": "integer", "example": 2139345 },
+                              "isDraft": { "type": "boolean", "example": false },
+                              "ratingText": { "type": "string", "example": "Drove all the way from West to stand in front of a closed shop..." },
+                              "ratingValue": { "type": "integer", "example": 1 },
+                              "reviewReply": { "type": "string", "example": "Dear Jesse,\nThank you for your feedback..." },
+                              "reviewReplyType": { "type": "string", "example": "dailyJobTemplate" },
+                              "reviewerTitle": { "type": "string", "example": "Jesse" },
+                              "url": { "type": "string", "format": "url", "nullable": true, "example": null },
+                              "thirdPartyReviewSourcesId": { "type": "integer", "example": 69 },
+                              "locationId": { "type": "integer", "example": 93 },
+                              "processedByPastReplyJob": { "type": "boolean", "example": false },
+                              "sentimentAnalysis": { "type": "string", "example": "Negative" },
+                              "satisfactoryLevel": { "type": "integer", "example": 60 },
+                              "task": {
+                                "type": "object",
+                                "properties": {
+                                  "id": { "type": "integer", "example": 28002 }
+                                }
+                              },
+                              "location": {
+                                "type": "object",
+                                "properties": {
+                                  "id": { "type": "integer", "example": 93 },
+                                  "enableReviewAgent": { "type": "boolean", "example": true }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request. Invalid parameters provided."
+          },
+          "401": {
+            "description": "Unauthorized. Invalid or missing Bearer token."
+          },
+          "404": {
+            "description": "Not Found. The location with the specified ID was not found."
+          },
+          "500": {
+            "description": "Internal Server Error."
+          }
+        }
+      }
+    },
+    "/post/getMiscellenous": {
+      "get": {
+        "summary": "Get Miscellaneous Posts for Locations",
+        "description": "Retrieves miscellaneous posts for one or more specified location IDs, with an optional filter for post status (upcoming or completed).",
+        "tags": [
+          "Post"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "locationIds",
+            "in": "query",
+            "description": "Comma-separated string of location IDs (e.g., '93,94').",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "93,94"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter posts by status.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["upcoming", "completed"]
+            },
+            "example": "upcoming"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved posts.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": { "type": "boolean", "example": true },
+                    "message": { "type": "string", "example": "Posts" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "results": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": { "type": "integer", "example": 5592 },
+                              "content": { "type": "string", "example": "\nFACTORY GIRL is the perfect place to enjoy a healthy breakfast..." },
+                              "url": { "type": "string", "format": "url", "nullable": true, "example": "https://factorygirl.net/" },
+                              "title": { "type": "string", "nullable": true, "example": "" },
+                              "count": { "type": "integer", "example": 3 },
+                              "postTime": { "type": "string", "format": "time", "example": "05:30:00" },
+                              "postDate": { "type": "string", "format": "date", "example": "2023-10-06" },
+                              "errorMessage": { "type": "string", "nullable": true, "example": null },
+                              "deletedAt": { "type": "string", "format": "date-time", "nullable": true, "example": null },
+                              "status": { "type": "string", "example": "repeate" },
+                              "repeat": { "type": "string", "example": "monthly" },
+                              "postType": { "type": "string", "example": "BOOK" },
+                              "uploadUberAll": { "type": "boolean", "example": false },
+                              "startDate": { "type": "string", "format": "date-time", "example": "2024-01-06T05:30:00.000Z" },
+                              "endDate": { "type": "string", "format": "date-time", "nullable": true, "example": null },
+                              "limited": { "type": "boolean", "example": false },
+                              "isUploadPicture": { "type": "boolean", "example": true },
+                              "isPaused": { "type": "boolean", "example": false },
+                              "customSchedule": {
+                                "type": "object",
+                                "nullable": true,
+                                "properties": {
+                                  "frequency": { "type": "string", "example": "" },
+                                  "occurance": { "type": "integer", "example": 1 },
+                                  "days": { "type": "array", "items": { "type": "string" }, "example": [] },
+                                  "dates": { "type": "array", "items": { "type": "string" }, "example": [] }
+                                },
+                                "example": null
+                              },
+                              "companyId": { "type": "integer", "example": 60 },
+                              "createdAt": { "type": "string", "format": "date-time", "example": "2023-09-29T19:12:19.281Z" },
+                              "updatedAt": { "type": "string", "format": "date-time", "example": "2023-12-06T05:00:17.358Z" },
+                              "postPicture": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "id": { "type": "integer", "example": 5592 },
+                                    "url": { "type": "string", "format": "url", "example": "https://obenan-files-upload.s3.amazonaws.com/locations/undefined/posts/23b6488b-a45c-4539-8480-4c7881eb5ab5.jpeg" },
+                                    "key": { "type": "string", "example": "23b6488b-a45c-4539-8480-4c7881eb5ab5.jpeg" },
+                                    "deletedAt": { "type": "string", "format": "date-time", "nullable": true, "example": null },
+                                    "postId": { "type": "integer", "example": 5592 },
+                                    "createdAt": { "type": "string", "format": "date-time", "example": "2023-09-29T19:12:19.298Z" },
+                                    "updatedAt": { "type": "string", "format": "date-time", "example": "2023-09-29T19:12:19.298Z" }
+                                  }
+                                }
+                              },
+                              "postLocations": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "id": { "type": "integer", "example": 90919 },
+                                    "startDate": { "type": "string", "format": "date-time", "example": "2024-02-06T05:30:00.000Z" },
+                                    "count": { "type": "integer", "example": 3 },
+                                    "failCount": { "type": "integer", "example": 0 },
+                                    "errorMessage": { "type": "string", "nullable": true, "example": null },
+                                    "deletedAt": { "type": "string", "format": "date-time", "nullable": true, "example": null },
+                                    "status": { "type": "string", "example": "repeate" },
+                                    "postId": { "type": "integer", "example": 5592 },
+                                    "locationId": { "type": "integer", "example": 93 },
+                                    "createdAt": { "type": "string", "format": "date-time", "example": "2023-09-29T19:12:19.303Z" },
+                                    "updatedAt": { "type": "string", "format": "date-time", "example": "2023-12-28T12:18:50.554Z" },
+                                    "location": {
+                                      "type": "object",
+                                      "properties": {
+                                        "id": { "type": "integer", "example": 93 },
+                                        "name": { "type": "string", "example": "FACTORY GIRL" },
+                                        "internalName": { "type": "string", "example": "FACTORY GIRL" },
+                                        "addressLine1": { "type": "string", "example": "Saenredamstraat 32" },
+                                        "addressLine2": { "type": "string", "nullable": true, "example": "" },
+                                        "city": { "type": "string", "example": "Amsterdam" },
+                                        "country": { "type": "string", "example": "Netherlands" }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request. Invalid parameters provided (e.g., badly formatted locationIds)."
+          },
+          "401": {
+            "description": "Unauthorized. Invalid or missing Bearer token."
+          },
+          "404": {
+            "description": "Not Found. One or more locations specified by locationIds were not found."
+          },
+          "500": {
+            "description": "Internal Server Error."
+          }
+        }
+      }
+    },
+    "/locationListing/{location_id}": {
+      "get": {
+        "summary": "Get Location Listing Details",
+        "description": "Retrieves detailed information for a specific location listing. The response is a large JSON object, so a placeholder is used in this example.",
+        "tags": [
+          "Location"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "location_id",
+            "in": "path",
+            "description": "Unique integer identifier for the location listing.",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1762
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with location listing details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": { "type": "boolean", "example": true },
+                    "message": { "type": "string", "example": "Success" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "result": {
+                          "type": "object",
+                          "properties": {
+                            "_id": { "type": "string", "example": "640341dc05027ab6d1f5a49a" },
+                            "google": {
+                              "type": "object",
+                              "properties": {
+                                "title": { "type": "string", "example": "FACTORY GIRL Restaurant" },
+                                "attributes": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "properties": {
+                                      "name": { "type": "string", "example": "attributes/has_seating_rooftop" },
+                                      "valueType": { "type": "string", "example": "BOOL" },
+                                      "values": { "type": "array", "items": { "type": "boolean" }, "example": [false] }
+                                    }
+                                  }
+                                },
+                                "categories": {
+                                  "type": "object",
+                                  "properties": {
+                                    "primaryCategory": {
+                                      "type": "object",
+                                      "properties": {
+                                        "displayName": { "type": "string", "example": "Breakfast restaurant" },
+                                        "name": { "type": "string", "example": "categories/gcid:breakfast_restaurant" }
+                                      }
+                                    },
+                                    "additionalCategories": {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "object",
+                                        "properties": {
+                                          "displayName": { "type": "string", "example": "Restaurant" },
+                                          "name": { "type": "string", "example": "categories/gcid:restaurant" }
+                                        }
+                                      }
+                                    }
+                                  }
+                                },
+                                "regularHours": {
+                                  "type": "object",
+                                  "description": "Object detailing regular opening hours.",
+                                  "example": { "periods": [ { "openDay": "MONDAY", "openTime": {"hours": 9, "minutes": 0}, "closeDay": "MONDAY", "closeTime": {"hours": 15, "minutes": 0} } ] }
+                                },
+                                "specialHours": {
+                                  "type": "object",
+                                  "description": "Object detailing special opening hours.",
+                                   "example": { "specialHourPeriods": [ { "startDate": {"year": 2024, "month": 12, "day": 24}, "endDate": {"year": 2024, "month": 12, "day": 24}, "closed": true } ] }
+                                },
+                                "storefrontAddress": {
+                                  "type": "object",
+                                  "properties": {
+                                    "regionCode": { "type": "string", "example": "DE" },
+                                    "languageCode": { "type": "string", "example": "de" },
+                                    "postalCode": { "type": "string", "example": "10117" },
+                                    "locality": { "type": "string", "example": "Berlin" },
+                                    "addressLines": { "type": "array", "items": { "type": "string" }, "example": ["Friedrichstraße 113"] }
+                                  }
+                                },
+                                "media": {
+                                  "type": "array",
+                                  "description": "List of media items, typically photos.",
+                                  "items": {
+                                    "type": "object",
+                                    "properties": {
+                                      "name": { "type": "string", "example": "accounts/.../media/..." },
+                                      "sourceUrl": { "type": "string", "format": "url", "example": "https://example.com/image.jpg" },
+                                      "mediaFormat": { "type": "string", "example": "PHOTO" },
+                                      "googleUrl": { "type": "string", "format": "url", "example": "https://lh3.googleusercontent.com/...=s0" }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized. Invalid or missing Bearer token."
+          },
+          "404": {
+            "description": "Not Found. The location with the specified ID was not found."
+          },
+          "500": {
+            "description": "Internal Server Error."
+          }
+        }
+      }
+    },
     "/posts": {
       "post": {
         "summary": "Create a new scheduled or repeating post for Google Business Profile and other directories",
